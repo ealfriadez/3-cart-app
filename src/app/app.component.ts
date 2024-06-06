@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { CartAppComponent } from './components/cart-app/cart-app.component';
+import { CartAppComponent } from './components/cart-app.component';
 
 @Component({
   selector: 'app-root',
