@@ -2,15 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { ProductService } from '../services/product.service';
 import { Product } from '../models/product';
 import { CatalogComponent } from './catalog/catalog.component';
-import { CartComponent } from './cart/cart.component';
 import { CartItem } from '../models/cartItem';
 import { NavbarComponent } from './navbar/navbar.component';
-import { CartModalComponent } from './cart-modal/cart-modal.component';
+import { RouterOutlet } from '@angular/router';
+import { SharingDataService } from '../services/sharing-data.service';
 
 @Component({
   selector: 'cart-app',
   standalone: true,
-  imports: [CatalogComponent, CartModalComponent, NavbarComponent],
+  imports: [CatalogComponent, NavbarComponent, RouterOutlet],
   templateUrl: './cart-app.component.html'
 })
 export class CartAppComponent implements OnInit{
@@ -19,16 +19,15 @@ export class CartAppComponent implements OnInit{
 
   items: CartItem[] = [];
 
-  // total: number = 0;
+  total: number = 0; 
 
-  showCart: boolean = false;
-
-  constructor(private service: ProductService){}
+  constructor(private sharingDataService: SharingDataService, private service: ProductService){}
   
   ngOnInit(): void {
     this.products = this.service.findAll();    
     this.items = JSON.parse(sessionStorage.getItem('cart')  || '[]');
-    //this.calculateTotal();
+    this.calculateTotal();
+    this.onDeleteCart();
   }
 
   onAddCart(product: Product): void{
@@ -46,29 +45,28 @@ export class CartAppComponent implements OnInit{
     } else {
       this.items = [... this.items, { product: { ... product }, quantiy: 1}];  
     }  
-    //this.calculateTotal();  
-    //this.saveSession();
+    this.calculateTotal();  
+    this.saveSession();
   }
 
-  onDeleteCart(id: number): void{
-    this.items = this.items.filter(item => item.product.id !== id);
-    if (this.items.length == 0) {
-      sessionStorage.removeItem('cart');
-      sessionStorage.clear();
-    }
-    //this.calculateTotal();
-    //this.saveSession();
+  onDeleteCart(): void{
+    this.sharingDataService.idProductEventEmitter.subscribe(id => {
+      console.log(id + ' se ha ejecutado el evento idProductEventEmitter');
+      this.items = this.items.filter(item => item.product.id !== id);
+      if (this.items.length == 0) {
+        sessionStorage.removeItem('cart');
+        sessionStorage.clear();
+      }
+      this.calculateTotal();
+      this.saveSession();
+    });    
   }
 
-  // calculateTotal(): void{
-  //   this.total = this.items.reduce((accumulator, item) => accumulator + item.quantiy * item.product.price, 0);
-  // }
+  calculateTotal(): void{
+    this.total = this.items.reduce((accumulator, item) => accumulator + item.quantiy * item.product.price, 0);
+  }
 
-  // saveSession(): void{
-  //   sessionStorage.setItem('cart', JSON.stringify(this.items));
-  // }
-
-  openCloseCart(): void{
-    this.showCart = !this.showCart;
+  saveSession(): void{
+    sessionStorage.setItem('cart', JSON.stringify(this.items));
   }
 }
