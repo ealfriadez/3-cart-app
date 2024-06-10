@@ -1,6 +1,6 @@
 <h2>Catalogo de productos App...!</h2>
 
-<catalog [products]="products"/>
+<catalog [products]="products" (productEventEmitter)="onAddCart($event)"/>
 
 @if (items.length > 0) {
     <cart [items]="items"/>

@@ -22,4 +22,21 @@ export class CartAppComponent implements OnInit{
   ngOnInit(): void {
     this.products = this.service.findAll();
   }
+
+  onAddCart(product: Product): void{
+    const hasItem = this.items.find(item => item.product.id === product.id);
+    if (hasItem) {
+      this.items = this.items.map(item => {
+        if (item.product.id === product.id) {
+          return {
+            ... item,
+            quantiy: item.quantiy +1
+          }
+        }
+        return item;
+      })
+    } else {
+      this.items = [... this.items, { product: { ... product }, quantiy: 1}];  
+    }    
+  }
 }
