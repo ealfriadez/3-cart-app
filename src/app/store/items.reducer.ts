@@ -1,6 +1,7 @@
 import { createReducer, on } from "@ngrx/store"
 import { CartItem } from "../models/cartItem"
-import { add } from "./items.actions"
+import { add, remove, total } from "./items.actions"
+import { state } from "@angular/animations"
 
 export interface ItemsState{
     items: CartItem[],
@@ -28,10 +29,25 @@ export const itemsReducer = createReducer(
                     }
                 return item;
             }),
-            
-        };
+            total: state.total        
+        }
       } else {
-        return [... state.items, { product: { ... product }, quantiy: 1}];  
+        return {
+            items: [... state.items, { product: { ...product }, quantiy: 1}],
+            total: state.total
+        }  
       } 
+    }),
+    on(remove, (state, {id}) => {
+        return {
+            items: state.items.filter(item => item.product.id !== id),
+            total: state.total
+        }
+    }),
+    on(total, state => {
+        return{
+            items: state.items,
+            total: state.items.reduce((accumulator, item) => accumulator + item.quantiy * item.product.price, 0)
+        }
     })
 )
